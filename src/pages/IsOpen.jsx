@@ -1,29 +1,41 @@
-import React, { useEffect, useState } from 'react'
-import Card from '../components/Card'
-import { getOpenRestaurants } from '../utils/api';
-import image from "../assets/bg-card2.jpg"
+import React, { useEffect, useState } from "react";
+import Card from "../components/Card";
+import { getOpenRestaurants } from "../utils/api";
+import image from "../assets/bg-card2.jpg";
+import { AiOutlineLoading } from "react-icons/ai";
 
 const IsOpen = () => {
   const [open, setOpen] = useState([]);
   const [loadMore, setLoadMore] = useState(6);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const check = localStorage.getItem("open");
-
+    setLoading(true);
     if (check) {
       setOpen(JSON.parse(check));
+      setLoading(false);
     } else {
       getOpenRestaurants().then((recipes) => {
-        localStorage.setItem("open", JSON.stringify(recipes));
-        setOpen(recipes);
+        if (recipes.status === 200) {
+          localStorage.setItem("open", JSON.stringify(recipes.data));
+          setOpen(recipes.data);
+          setLoading(false);
+        }
       });
     }
   }, []);
   const handleLoad = () => {
     setLoadMore((prevValue) => prevValue + 6);
   };
+  // console.log(check)
   return (
     <section className="my-10 px-8 sm:px-14 md:px-20">
+      {loading ? (
+        <AiOutlineLoading className="text-5xl md:text-7xl mb-5 mx-auto animate-spin" />
+      ) : (
+        ""
+      )}
       <h2 className="text-3xl mb-10">Open Now</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
         {open.slice(0, loadMore).map((item) => {
@@ -52,7 +64,7 @@ const IsOpen = () => {
         </button>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default IsOpen
+export default IsOpen;
